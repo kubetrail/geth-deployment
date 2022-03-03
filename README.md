@@ -19,7 +19,7 @@ make docker-build
 make docker-push
 ```
 once the container image is available in your registry you can
-deploy the `geth` node.
+deploy `geth` to a kubernetes cluster.
 
 ```bash
 make deploy
@@ -50,7 +50,7 @@ node IP (not cluster-ip).
 ## interact with the chain
 Exec into the pod by running `geth attach` command as shown below:
 ```bash
-kubectl --namespace=geth-system exec -it deployment/geth-controller-manager -- /geth attach /tmp/geth.ipc
+make console
 Welcome to the Geth JavaScript console!
 
 instance: Geth/v1.10.16-stable-20356e57/linux-arm64/go1.17.7
@@ -65,25 +65,42 @@ To exit, press ctrl-d or type exit
 
 Transfer funds to an address:
 ```bash
-> eth.sendTransaction({from:eth.coinbase, to:"0x--address-redacted--", value: web3.toWei(125, "ether")})
+> eth.sendTransaction({from:eth.coinbase, to:"0x62c1831A63069619EE94d73853C21ceD076d0665", value: web3.toWei(125, "ether")})
 ```
 
 ## connect via Metamask
+First, port-forward RPC
+```bash
+make port-forward-rpc
+Forwarding from 127.0.0.1:8545 -> 8545
+Forwarding from [::1]:8545 -> 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+Handling connection for 8545
+```
+
 Metamask Chrome extension can be configured to connect to this network.
 > Note that Metamask smartphone app will not accept http only RPC addresses
 > and therefore in such cases only Chrome extensions can be used.
 > See more: https://github.com/MetaMask/metamask-mobile/issues/2314#issuecomment-1013680137
 
-Connection parameters:
-* RPC: http://<nodeIP>:30007
+Connection parameters, typically already setup as `Localhost` network:
+* RPC: http://127.0.0.1:8545
 * ChainID: 1337
 * Currency symbol: ETH
 
-At this point the funds transferred above should be visible in the Metamask wallet.
+At this point the funds transferred in previous should be visible in the Metamask wallet
+assuming you have configured Metamask with the same address.
 
 ## linux and arm64 users:
 First set env. var `PROJECT` to point to Google cloud project ID.
-Also make sure you have artiact registry API enabled and a repo called
+Also make sure you have artifact registry API enabled and a repo called
 `services` has been provisioned for container images to reside in it.
 
 `podman` can be used instead of `docker` to build and push multi-arch container
@@ -101,3 +118,7 @@ make podman-push
 ```
 
 This will push the container images to your registry and link them in a manifest.
+
+## references:
+* https://geth.ethereum.org/docs/getting-started/dev-mode
+* https://dev.to/blockchain_dev/getting-started-with-ethereum-connecting-geth-remix-and-metamask-for-local-development-ce1
