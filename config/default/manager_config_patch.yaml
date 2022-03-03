@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: geth
+        args:
+        #- --datadir
+        #- /data
+        - --http
+        - --dev
+        - --http.addr=0.0.0.0
+        - --http.port=8545
+        - --http.vhosts=*
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data
