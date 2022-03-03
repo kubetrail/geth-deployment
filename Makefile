@@ -223,7 +223,7 @@ deploy-manifests: manifests kustomize ## Deploy-manifests generates k8s manifest
 # logs monitors logs from the controller
 .PHONY: logs
 logs:
-	@kubectl --namespace=${NAME}-system logs -f deployments.apps/${NAME}-controller-manager -c geth
+	@kubectl --namespace=${NAME}-system logs -f deployments.apps/${NAME}-controller-manager -c manager
 
 # reboot scales down and then up the controller deployment
 .PHONY: reboot
@@ -234,4 +234,40 @@ reboot:
 # watch watches a few resources
 .PHONY: watch
 watch:
-	@watch kubectl --namespace=${NAME}-system get pods,svc,configmaps,secrets,servicemonitors
+	@watch kubectl --namespace=${NAME}-system get pods,svc,configmaps,secrets
+
+# set default namespace
+.PHONY: ns
+ns:
+	@kubectl config set-context --current --namespace=${NAME}-system
+
+# port forward RPC port 8545 to localhost
+.PHONY: port-forward-rpc
+port-forward-rpc:
+	@kubectl --namespace=${NAME}-system port-forward service/${NAME}-${NAME} 8545
+
+# port forward websocket port 8546 to localhost
+.PHONY: port-forward-ws
+port-forward-ws:
+	@kubectl --namespace=${NAME}-system port-forward service/${NAME}-${NAME} 8546
+
+# start geth repl console
+.PHONY: console
+console:
+	@kubectl --namespace=${NAME}-system exec -it deployment/${NAME}-controller-manager -- /geth attach /data/geth.ipc
+
+# deploy a GKE cluster
+.PHONY: gke-auto
+gke-auto:
+	@gcloud container \
+		--project ${PROJECT} \
+		clusters create-auto "geth-cluster-1" \
+		--region "us-central1" \
+		--release-channel "regular" \
+		--network "projects/${PROJECT}/global/networks/default" \
+		--subnetwork "projects/${PROJECT}/regions/us-central1/subnetworks/default" \
+		--cluster-ipv4-cidr "/17" \
+		--services-ipv4-cidr "/22"
+	@gcloud container clusters get-credentials geth-cluster-1 \
+		--region us-central1 \
+		--project ${PROJECT}

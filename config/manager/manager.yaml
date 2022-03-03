@@ -34,9 +34,14 @@ spec:
         - --http.port=8545
         - --http.vhosts=*
         image: controller:latest
-        name: geth
+        name: manager
+        ports:
+          - containerPort: 8545
+            name: rpc
+          - containerPort: 8546
+            name: ws
         securityContext:
-          allowPrivilegeEscalation: false
+          allowPrivilegeEscalation: true
         resources:
           limits:
             cpu: 200m
@@ -52,25 +57,25 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
 spec:
-  storageClassName: nfs
+  storageClassName: standard
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 3Gi
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: geth
 spec:
-  type: NodePort
+  ports:
+    - name: rpc
+      port: 8545
+      targetPort: 8545
+    - name: ws
+      port: 8546
+      targetPort: 8546
   selector:
     control-plane: controller-manager
-  ports:
-    # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
-    - port: 8545
-      targetPort: 8545
-      # Optional field
-      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
-      nodePort: 30007
+  type: ClusterIP
