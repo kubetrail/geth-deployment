@@ -27,25 +27,22 @@ make deploy
 
 The status of k8s resources should appear as follows:
 ```bash
-kubectl --namespace=geth-system get pods,svc,configmaps,secrets,servicemonitors                                                    dusy: Wed Mar  2 21:13:30 2022
+kubectl --namespace=geth-system get pods,svc,configmaps,secrets                                                                    dusy: Thu Mar  3 09:00:15 2022
 
 NAME                                           READY   STATUS    RESTARTS   AGE
-pod/geth-controller-manager-67dcb6867f-xm7sd   1/1     Running   0          91m
+pod/geth-controller-manager-65dcc9f484-27dpt   1/1     Running   0          4m18s
 
-NAME                TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-service/geth-geth   NodePort   10.101.141.39   <none>        8545:30007/TCP   91m
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+service/geth-geth   ClusterIP   10.107.236.154   <none>        8545/TCP,8546/TCP   4m20s
 
 NAME                         DATA   AGE
-configmap/kube-root-ca.crt   1      91m
+configmap/kube-root-ca.crt   1      4m20s
 
 NAME                                         TYPE                                  DATA   AGE
-secret/artifact-registry-key                 kubernetes.io/dockerconfigjson        1      91m
-secret/default-token-r4zrn                   kubernetes.io/service-account-token   3      91m
-secret/geth-controller-manager-token-tnn86   kubernetes.io/service-account-token   3      91m
+secret/artifact-registry-key                 kubernetes.io/dockerconfigjson        1      4m20s
+secret/default-token-m7tpn                   kubernetes.io/service-account-token   3      4m20s
+secret/geth-controller-manager-token-lbn6t   kubernetes.io/service-account-token   3      4m20s
 ```
-
-The service is available as `NodePort` and can be accessed by connecting to the
-node IP (not cluster-ip).
 
 ## interact with the chain
 Exec into the pod by running `geth attach` command as shown below:
